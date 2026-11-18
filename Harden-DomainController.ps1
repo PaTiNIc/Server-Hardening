@@ -37,20 +37,29 @@ if (-not (Test-Path $kerbPath)) { New-Item -Path $kerbPath -Force | Out-Null }
 Set-ItemProperty -Path $kerbPath -Name "SupportedEncryptionTypes" -Value 24 -Type DWord -Force
 Write-Log "Kerberos auf AES128 und AES256 beschränkt (Wert 24)"
 
-# 3. DC-Firewallregeln nur anlegen, wenn sie noch nicht existieren
+# 3. DC-Firewallregeln: je Protokoll eine Regel, Fehler werden protokolliert
 $dcRules = @(
-    @{ Name = "AD LDAP";     Protocol = "TCP";     Port = 389 },
-    @{ Name = "AD Kerberos"; Protocol = "TCP,UDP"; Port = 88 },
-    @{ Name = "AD DNS";      Protocol = "TCP,UDP"; Port = 53 }
+    @{ Name = "AD LDAP";         Protocol = "TCP"; Port = 389 },
+    @{ Name = "AD Kerberos TCP"; Protocol = "TCP"; Port = 88 },
+    @{ Name = "AD Kerberos UDP"; Protocol = "UDP"; Port = 88 },
+    @{ Name = "AD DNS TCP";      Protocol = "TCP"; Port = 53 },
+    @{ Name = "AD DNS UDP";      Protocol = "UDP"; Port = 53 }
 )
 foreach ($rule in $dcRules) {
     if (-not (Get-NetFirewallRule -DisplayName $rule.Name -ErrorAction SilentlyContinue)) {
-        New-NetFirewallRule -DisplayName $rule.Name -Direction Inbound -Action Allow `
-            -Protocol $rule.Protocol -LocalPort $rule.Port | Out-Null
-        Write-Log "Firewallregel angelegt: $($rule.Name)"
+        try {
+            New-NetFirewallRule -DisplayName $rule.Name -Direction Inbound -Action Allow `
+                -Protocol $rule.Protocol -LocalPort $rule.Port -ErrorAction Stop | Out-Null
+            Write-Log "Firewallregel angelegt: $($rule.Name)"
+        } catch {
+            Write-Log "FEHLER Firewallregel $($rule.Name): $($_.Exception.Message)"
+        }
     } else {
         Write-Log "Firewallregel bereits vorhanden: $($rule.Name)"
     }
 }
+
+
+
 
 Write-Log "DC-Hardening abgeschlossen. Neustart empfohlen."

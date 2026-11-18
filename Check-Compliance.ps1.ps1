@@ -23,7 +23,6 @@ function Get-RegValue {
 
 # Rollenerkennung: ProductType 2 = Domain Controller
 $isDC = (Get-CimInstance Win32_OperatingSystem).ProductType -eq 2
-$role = if ($isDC) { "Domain Controller" } else { "Dateiserver" }
 
 # --- Allgemeine Controls (Basisskript) ---
 
@@ -51,7 +50,7 @@ Add-Check "RDP-01" "RDP nur mit TLS (SecurityLayer 2)" ($secLayer -eq 2) "Securi
 # Audit-Unterkategorien über GUID (unabhängig von der Systemsprache)
 $auditRows = auditpol /get /category:* /r | ConvertFrom-Csv
 $guidProp = ($auditRows[0].PSObject.Properties | Where-Object { $_.Name -match 'GUID' }).Name
-$inclProp = ($auditRows[0].PSObject.Properties | Where-Object { $_.Name -match 'Einschluss|Inclusion' }).Name
+$inclProp = ($auditRows[0].PSObject.Properties | Where-Object { $_.Name -match 'Aufnahme|Inclusion|Einschluss' }).Name
 
 $auditChecks = @(
     @{ Id = "AUD-01"; Guid = "{0CCE923F-69AE-11D9-BED3-505054503030}"; Name = "Audit Kontoanmeldung (Credential Validation)" },
@@ -99,7 +98,6 @@ $total  = $results.Count
 
 $lines = @()
 $lines += "=== CIS Compliance Check ==="
-$lines += "Computer: $env:COMPUTERNAME   Rolle: $role"
 $lines += "Datum:    $(Get-Date -Format 'dd.MM.yyyy HH:mm')"
 $lines += ""
 foreach ($r in $results) {

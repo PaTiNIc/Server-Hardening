@@ -60,4 +60,27 @@ $rdpPath = "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\R
 Set-ItemProperty -Path $rdpPath -Name "SecurityLayer" -Value 2 -Type DWord -Force
 Write-Log "RDP auf TLS-Sicherheitsschicht gesetzt"
 
+# 7. 3DES (SWEET32, CVE-2016-2183) über SCHANNEL deaktivieren
+$tdesPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\Triple DES 168"
+if (-not (Test-Path $tdesPath)) { New-Item -Path $tdesPath -Force | Out-Null }
+Set-ItemProperty -Path $tdesPath -Name "Enabled" -Value 0 -Type DWord -Force
+Write-Log "3DES (Triple DES 168) über SCHANNEL deaktiviert"
+
+# 8. TLS 1.0 und 1.1 für Server deaktivieren
+$protoBase = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+foreach ($proto in @("TLS 1.0", "TLS 1.1")) {
+    $p = "$protoBase\$proto\Server"
+    if (-not (Test-Path $p)) { New-Item -Path $p -Force | Out-Null }
+    Set-ItemProperty -Path $p -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $p -Name "DisabledByDefault" -Value 1 -Type DWord -Force
+    Write-Log "$proto Server deaktiviert"
+}
+
+# 9. TLS 1.2 für Server aktivieren
+$p12 = "$protoBase\TLS 1.2\Server"
+if (-not (Test-Path $p12)) { New-Item -Path $p12 -Force | Out-Null }
+Set-ItemProperty -Path $p12 -Name "Enabled" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $p12 -Name "DisabledByDefault" -Value 0 -Type DWord -Force
+Write-Log "TLS 1.2 Server aktiviert"
+
 Write-Log "Common Hardening abgeschlossen. Neustart erforderlich, bevor der Compliance-Check läuft."
