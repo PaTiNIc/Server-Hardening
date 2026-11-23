@@ -26,9 +26,10 @@ if ((Get-CimInstance Win32_OperatingSystem).ProductType -ne 2) {
 Write-Log "Starte DC-spezifisches Hardening..."
 
 # 1. LDAP-Signierung erforderlich (2)
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters" `
+$ntdsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters"
+Set-ItemProperty -Path $ntdsPath `
     -Name "LDAPServerIntegrity" -Value 2 -Type DWord -Force
-Write-Log "LDAP-Signierung erforderlich gesetzt"
+Write-Log "LDAP-Signierung erforderlich gesetzt (LDAPServerIntegrity=2)"
 
 # 2. Kerberos auf AES128 und AES256 beschränken (24, ohne RC4)
 #    GPO-Pfad für "Konfiguration der unterstützten Verschlüsselungstypen für Kerberos"
@@ -58,8 +59,5 @@ foreach ($rule in $dcRules) {
         Write-Log "Firewallregel bereits vorhanden: $($rule.Name)"
     }
 }
-
-
-
 
 Write-Log "DC-Hardening abgeschlossen. Neustart empfohlen."
