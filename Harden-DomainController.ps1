@@ -1,4 +1,4 @@
-# Harden-DomainController.ps1
+## Harden-DomainController.ps1
 # Zusätzliche CIS-Level-1-Maßnahmen für Domain Controller
 # Ausführung als Administrator, nach der AD-DS-Hochstufung.
 

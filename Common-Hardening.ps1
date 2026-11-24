@@ -1,4 +1,4 @@
-# Common-Hardening.ps1
+## Common-Hardening.ps1
 # Gemeinsame CIS-Level-1-Maßnahmen für Domain Controller und Dateiserver
 # Ausführung als Administrator. Neustart nach Abschluss erforderlich.
 

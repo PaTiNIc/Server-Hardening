@@ -1,4 +1,4 @@
-# Check-Compliance.ps1
+## Check-Compliance.ps1
 # Prüft die CIS-Level-1-Controls aus Common-Hardening.ps1, Harden-DomainController.ps1
 # und Harden-Fileserver.ps1. Ändert keine Einstellungen. Ausführung als Administrator.
 

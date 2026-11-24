@@ -1,4 +1,4 @@
-﻿# Harden-Dateiserver.ps1
+﻿## Harden-Dateiserver.ps1
 # Zusätzliche CIS-Level-1-Maßnahmen für Dateiserver
 # Ausführung als Administrator, nach dem Klonen und der Rolleneinrichtung.
 
